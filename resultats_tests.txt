@@ -1,0 +1,41 @@
+tests (unittest.loader._FailedTest.tests) ... ERROR
+
+======================================================================
+ERROR: tests (unittest.loader._FailedTest.tests)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: tests
+Traceback (most recent call last):
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python313\Lib\unittest\loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "C:\Users\andre\AppData\Local\Programs\Python\Python313\Lib\unittest\loader.py", line 339, in _get_module_from_name
+    __import__(name)
+    ~~~~~~~~~~^^^^^^
+  File "C:\Users\andre\Desktop\RESTFUL\support_api\tests.py", line 3, in <module>
+    from rest_framework.test import APIClient
+  File "C:\Users\andre\Desktop\RESTFUL\venv\Lib\site-packages\rest_framework\test.py", line 138, in <module>
+    class APIRequestFactory(DjangoRequestFactory):
+    ...<104 lines>...
+            return request
+  File "C:\Users\andre\Desktop\RESTFUL\venv\Lib\site-packages\rest_framework\test.py", line 139, in APIRequestFactory
+    renderer_classes_list = api_settings.TEST_REQUEST_RENDERER_CLASSES
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\Desktop\RESTFUL\venv\Lib\site-packages\rest_framework\settings.py", line 220, in __getattr__
+    val = self.user_settings[attr]
+          ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\Desktop\RESTFUL\venv\Lib\site-packages\rest_framework\settings.py", line 211, in user_settings
+    self._user_settings = getattr(settings, 'REST_FRAMEWORK', {})
+                          ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\andre\Desktop\RESTFUL\venv\Lib\site-packages\django\conf\__init__.py", line 81, in __getattr__
+    self._setup(name)
+    ~~~~~~~~~~~^^^^^^
+  File "C:\Users\andre\Desktop\RESTFUL\venv\Lib\site-packages\django\conf\__init__.py", line 61, in _setup
+    raise ImproperlyConfigured(
+    ...<4 lines>...
+    )
+django.core.exceptions.ImproperlyConfigured: Requested setting REST_FRAMEWORK, but settings are not configured. You must either define the environment variable DJANGO_SETTINGS_MODULE or call settings.configure() before accessing settings.
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)

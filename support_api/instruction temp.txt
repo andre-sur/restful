@@ -1,1 +1,6 @@
 .\env\Scripts\activate
+
+(venv) PS C:\Users\andre\Desktop\RESTFUL> python manage.py test support_api
+python manage.py test support_api
+
+
