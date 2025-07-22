@@ -1,13 +1,13 @@
+import os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rest.settings')
+
+import django
+django.setup()
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from support_api.models import Project, Contributor, Issue, Comment
-import os
-import django
-
-# Configuration des settings Django si nécessaire
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rest.settings')
-django.setup()
 
 User = get_user_model()
 
