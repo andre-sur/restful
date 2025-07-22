@@ -3,8 +3,12 @@ from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from support_api.models import Project, Contributor, Issue, Comment
 from rest_framework.reverse import reverse
+import os
 
 User = get_user_model()
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'support_api.settings')
+
 
 class CommentPermissionsTest(TestCase):
     def setUp(self):
