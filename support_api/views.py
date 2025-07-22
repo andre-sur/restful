@@ -8,7 +8,6 @@ from .serializers import *
 from .permissions import IsContributorOrAuthor, IsContributor,IsCommentAuthorOrReadOnly,IsIssueAuthorOrReadOnly,IsProjectAuthorOrReadOnly
 from django.db.models import Q
 
-
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
@@ -48,10 +47,8 @@ class CommentViewSet(viewsets.ModelViewSet):
            # Q(issue__project__contributors__user=user) |
             #Q(issue__project__author=user)
         #).distinct()
-
 #        print("DEBUG: Comments queryset IDs =", list(comments.values_list('id', flat=True)))
         return comments
-
 
     def perform_create(self, serializer):
         # l'auteur d'une commande qu'on créée est l'user connecté
