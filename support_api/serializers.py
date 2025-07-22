@@ -16,6 +16,9 @@ class ProjectSerializer(serializers.ModelSerializer):
         model = Project
         fields = '__all__'
     
+    def validate_title(self, value):
+        return value.capitalize()
+
     description = serializers.CharField(
     required=True,
     max_length=100,
