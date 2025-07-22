@@ -39,15 +39,16 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsContributor,permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]  
   
     def get_queryset(self):
-        user = self.request.user
-        print("DEBUG: get_queryset for user =", user)
+        return Comment.objects.all()
+        #user = self.request.user
+        #print("DEBUG: get_queryset for user =", user)
 
-        comments = Comment.objects.filter(
-            Q(issue__project__contributors__user=user) |
-            Q(issue__project__author=user)
-        ).distinct()
+        #comments = Comment.objects.filter(
+           # Q(issue__project__contributors__user=user) |
+            #Q(issue__project__author=user)
+        #).distinct()
 
-        print("DEBUG: Comments queryset IDs =", list(comments.values_list('id', flat=True)))
+#        print("DEBUG: Comments queryset IDs =", list(comments.values_list('id', flat=True)))
         return comments
 
 

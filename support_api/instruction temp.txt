@@ -7,4 +7,79 @@ https://hoppscotch.io/
 
 http://127.0.0.1:8000/api/comments/
 
+DEMANDE TOKEN
+http://127.0.0.1:8000/api/token/
 
+{
+  "username": "ton_nom_utilisateur",
+  "password": "ton_mot_de_passe"
+}
+
+Pas de panique — ce `401 Unauthorized` signifie que ton endpoint `/api/comments/` nécessite **une authentification**, probablement via **JWT (JSON Web Token)** avec Django REST Framework + `SimpleJWT`.
+
+Voici **comment t’authentifier dans Hoppscotch** étape par étape :
+
+---
+
+### ✅ 1. Récupérer un token JWT
+
+Tu dois d’abord obtenir un **token d’accès** (access token) en envoyant une requête POST à :
+
+```
+http://127.0.0.1:8000/api/token/
+```
+
+**Body (JSON)** :
+
+```json
+{
+  "username": "ton_nom_utilisateur",
+  "password": "ton_mot_de_passe"
+}
+```
+
+Tu obtiendras une réponse du style :
+
+```json
+{
+  "access": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+👉 Copie le token `access`.
+
+---
+
+### ✅ 2. Faire une requête GET avec le token
+
+Maintenant que tu as le token :
+
+* Méthode : `GET`
+* URL : `http://127.0.0.1:8000/api/comments/`
+* Onglet **Auth** dans Hoppscotch :
+
+  * Choisis **Bearer Token**
+  * Colle ton token `access` dans le champ
+
+👉 Clique sur **Send**
+
+---
+
+### ✅ Résultat
+
+* **200 OK** = tout fonctionne
+* **403 Forbidden** = authentifié mais pas autorisé à voir ces données
+* **401 Unauthorized** = token invalide, expiré ou pas envoyé
+
+---
+
+envoie par curl mot de passe 
+curl.exe -X POST http://127.0.0.1:8000/api/token/ -H "Content-Type: application/json" -d "@body.json"
+
+retour de token
+{"refresh":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1Mzc5ODU1NSwiaWF0IjoxNzUzMTkzNzU1LCJqdGkiOiJlZGE4YWMzOGVhYzc0MmYxYjIyM2FlMTJiNjVlNjJiYyIsInVzZXJfaWQiOjV9.nxq5swkeCJtgYEhCCgUeSouOw-5VX42Z6hdXM3fxh6E","access":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTk5MTU1LCJpYXQiOjE3NTMxOTM3NTUsImp0aSI6IjhiODE0MDY3NmJjNDQ5NTRiOTUxZGY4NmE2NWEwNzk0IiwidXNlcl9pZCI6NX0.YJXaEyC-Hc6EqXL5_z8eCCTZwWrP9eRGVC-fWGuOvGA"}
+
+
+{"refresh":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc1Mzc5ODU1NSwiaWF0IjoxNzUzMTkzNzU1LCJqdGkiOiJlZGE4YWMzOGVhYzc0MmYxYjIyM2FlMTJiNjVlNjJiYyIsInVzZXJfaWQiOjV9.nxq5swkeCJtgYEhCCgUeSouOw-5VX42Z6hdXM3fxh6E",
+"access":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUzMTk5MTU1LCJpYXQiOjE3NTMxOTM3NTUsImp0aSI6IjhiODE0MDY3NmJjNDQ5NTRiOTUxZGY4NmE2NWEwNzk0IiwidXNlcl9pZCI6NX0.YJXaEyC-Hc6EqXL5_z8eCCTZwWrP9eRGVC-fWGuOvGA"}
