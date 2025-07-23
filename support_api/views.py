@@ -23,12 +23,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class IssueViewSet(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
  # Utiliser IsContributorOrAuthor ici
-    #permission_classes = [IsContributor,permissions.IsAuthenticated, IsIssueAuthorOrReadOnly]
+    permission_classes = [IsContributor,permissions.IsAuthenticated, IsIssueAuthorOrReadOnly]
 
     def get_queryset(self):
         # l'utilisateur doit être contributeur
-        return Issue.objects.all()#temporaire
-        #return Issue.objects.filter(project__contributors__user=self.request.user)
+        #return Issue.objects.all()#temporaire
+        return Issue.objects.filter(project__contributors__user=self.request.user)
 
     def perform_create(self, serializer):
         # une issue créée est attribuée à l'auteur automatiquement
@@ -39,14 +39,14 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsContributor,permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]  
   
     def get_queryset(self):
-        return Comment.objects.all()#temporaire test
-        #user = self.request.user
+        #return Comment.objects.all()#temporaire test
+        user = self.request.user
         #print("DEBUG: get_queryset for user =", user)
 
-        #comments = Comment.objects.filter(
-           # Q(issue__project__contributors__user=user) |
-            #Q(issue__project__author=user)
-        #).distinct()
+        comments = Comment.objects.filter(
+            Q(issue__project__contributors__user=user) |
+            Q(issue__project__author=user)
+        ).distinct()
 #        print("DEBUG: Comments queryset IDs =", list(comments.values_list('id', flat=True)))
         return comments
 
