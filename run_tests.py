@@ -4,7 +4,10 @@ import unittest
 import coverage
 from datetime import datetime
 
-filename = f"resultats_tests_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+from datetime import datetime
+
+filename = f"resultats_tests_{datetime.now().strftime('%d-%m-%Y_%Hh%M')}.txt"
+
 
 # 0. Configuration du chemin et variable d'env Django
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))  # C:\Users\andre\Desktop\RESTFUL

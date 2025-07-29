@@ -50,7 +50,7 @@ class CommentPermissionsTest(TestCase):
         url = f'/api/comments/{self.comment.id}/'
         response = self.client_stranger.get(url)
         print(f"RESPONSE API cannot see comment {response}")
-        self.assertEqual(response.status_code, 404)  # Non-contributeur = pas d'accès
+        self.assertEqual(response.status_code, 403)  # Non-contributeur = pas d'accès
 
     def test_contributor_can_see_comment(self):
         url = f'/api/comments/{self.comment.id}/'
