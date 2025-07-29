@@ -2,6 +2,9 @@ import os
 import sys
 import unittest
 import coverage
+from datetime import datetime
+
+filename = f"resultats_tests_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
 
 # 0. Configuration du chemin et variable d'env Django
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))  # C:\Users\andre\Desktop\RESTFUL
@@ -20,8 +23,8 @@ cov.start()
 loader = unittest.TestLoader()
 suite = loader.discover('support_api', pattern='tests.py')
 
-# 4. Lancer les tests et rediriger la sortie vers fichier
-with open('resultats_tests.txt', 'w', encoding='utf-8') as f:
+# 4. Lancer les tests et rediriger la sortie vers fichier (ajout stamp filename)
+with open(filename, 'w', encoding='utf-8') as f:
     runner = unittest.TextTestRunner(stream=f, verbosity=2)
     result = runner.run(suite)
 
