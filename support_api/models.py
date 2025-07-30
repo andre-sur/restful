@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 # Définition du modèle CustomUser (utilisateur personnalisé)
 class CustomUser(AbstractUser):
-    age = models.PositiveIntegerField(null=True, blank=True)
+    age = models.PositiveIntegerField(null=False, blank=False)
     can_be_contacted = models.BooleanField(default=False)
     can_data_be_shared = models.BooleanField(default=False)
 
@@ -16,7 +16,7 @@ class CustomUser(AbstractUser):
         if self.username.strip().lower() == 'robert':
             raise ValidationError("Nom d'utilisateur 'robert' interdit.")
 
-# Définition du modèle Project
+# Définition Project
 class Project(models.Model):
     TYPE_CHOICES = [('BACK_END', 'Back-end'), ('FRONT_END', 'Front-end'), ('IOS', 'iOS'), ('ANDROID', 'Android')]
     title = models.CharField(max_length=255)
@@ -25,7 +25,7 @@ class Project(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='projects') 
     created_time = models.DateTimeField(auto_now_add=True)
 
-# Définition du modèle Contributor
+# Définition Contributor
 class Contributor(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='contributors')
@@ -34,7 +34,7 @@ class Contributor(models.Model):
     class Meta:
         unique_together = ('user', 'project')
 
-# Définition du modèle Issue
+# Définition Issue
 class Issue(models.Model):
     PRIORITY_CHOICES = [('LOW', 'Low'), ('MEDIUM', 'Medium'), ('HIGH', 'High')]
     TAG_CHOICES = [('BUG', 'Bug'), ('FEATURE', 'Feature'), ('TASK', 'Task')]
@@ -50,7 +50,7 @@ class Issue(models.Model):
     assignee = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='assigned_issues')  
     created_time = models.DateTimeField(auto_now_add=True)
 
-# Définition du modèle Comment
+# Définition Comment
 class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     description = models.TextField()

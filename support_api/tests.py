@@ -46,6 +46,11 @@ class CommentPermissionsTest(TestCase):
         self.client_stranger = APIClient()
         self.client_stranger.force_authenticate(user=self.stranger)
 
+     # Création du superuser 
+        self.superuser = User.objects.create_superuser(username='superuser', password='pass', age=40)
+        self.client_superuser = APIClient()
+        self.client_superuser.force_authenticate(user=self.superuser)
+
     def test_stranger_cannot_see_comment(self):
         url = f'/api/comments/{self.comment.id}/'
         response = self.client_stranger.get(url)
@@ -73,3 +78,17 @@ class CommentPermissionsTest(TestCase):
         response = self.client_contributor.patch(url, data, format='json')
         print(f"RESPONSE 2 {response}")
         self.assertEqual(response.status_code, 403)
+
+    def test_cannot_create_user_with_age_under_15(self):
+        url = '/api/users/'
+        data = {
+            "username": "jeune",
+            "password": "difficile",
+            "email": "jeune@example.com",
+            "age": 12,
+            "can_be_contacted": False,
+            "can_data_be_shared": False
+        }
+        response = self.client_superuser.post(url, data, format='json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("age", response.data)

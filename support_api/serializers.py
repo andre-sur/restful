@@ -5,7 +5,11 @@ from .models import CustomUser, Project, Contributor, Issue, Comment
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'age', 'can_be_contacted', 'can_data_be_shared']
+        fields = ['id', 'username', 'password', 'email', 'age', 'can_be_contacted', 'can_data_be_shared']
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'age': {'required': True}
+        }
 
     def validate_age(self, value):
         if value < 15:
@@ -65,8 +69,8 @@ class IssueSerializer(serializers.ModelSerializer):
         read_only_fields = ['created_time']
 
     def validate_age(self, value):
-        if value is not None and value < 15:
-            raise serializers.ValidationError("L'utilisateur doit avoir au moins 15 ans.")
+        if value is not None and value <= 15:
+            raise serializers.ValidationError("L'utilisateur doit avoir plus de 15 ans.")
         return value
     
     def validate(self, data):
