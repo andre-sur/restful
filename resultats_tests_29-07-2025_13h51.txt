@@ -1,21 +1,12 @@
 test_author_can_update_comment (tests.CommentPermissionsTest.test_author_can_update_comment) ... ok
 test_contributor_can_see_comment (tests.CommentPermissionsTest.test_contributor_can_see_comment) ... ok
 test_contributor_cannot_update_comment (tests.CommentPermissionsTest.test_contributor_cannot_update_comment) ... ok
-test_stranger_cannot_see_comment (tests.CommentPermissionsTest.test_stranger_cannot_see_comment) ... FAIL
-
-======================================================================
-FAIL: test_stranger_cannot_see_comment (tests.CommentPermissionsTest.test_stranger_cannot_see_comment)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "C:\Users\andre\Desktop\RESTFUL\support_api\tests.py", line 53, in test_stranger_cannot_see_comment
-    self.assertEqual(response.status_code, 404)  # Non-contributeur = pas d'accès
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 403 != 404
+test_stranger_cannot_see_comment (tests.CommentPermissionsTest.test_stranger_cannot_see_comment) ... ok
 
 ----------------------------------------------------------------------
-Ran 4 tests in 5.426s
+Ran 4 tests in 5.469s
 
-FAILED (failures=1)
+OK
 
 
 Rapport de couverture:

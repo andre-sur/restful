@@ -5,13 +5,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Project, Contributor, Issue, Comment, CustomUser
 from .serializers import *
-from .permissions import IsContributorOrAuthor, IsContributor,IsCommentAuthorOrReadOnly,IsIssueAuthorOrReadOnly,IsProjectAuthorOrReadOnly
+from .permissions import *
 from django.db.models import Q
 
 class ProjectViewSet(viewsets.ModelViewSet):
     #queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [IsContributor,permissions.IsAuthenticated, IsProjectAuthorOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, IsProjectAuthorOrReadOnly, IsAgeCompliant]
 
     def get_queryset(self):
         return Project.objects.filter(contributors__user=self.request.user)
@@ -23,7 +23,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class IssueViewSet(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
  # Utiliser IsContributorOrAuthor ici
-    permission_classes = [IsContributor,permissions.IsAuthenticated, IsIssueAuthorOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, IsContributorOrAuthor]
 
     def get_queryset(self):
         # l'utilisateur doit être contributeur
@@ -72,6 +72,13 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]  # Assurez-vous que l'utilisateur soit authentifié
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsSuperUser()]  # seuls les superusers peuvent créer
+        elif self.action in ['update', 'partial_update', 'destroy']:
+            return [IsSelfOrSuperUser()]
+        return [permissions.IsAuthenticated()]
 
 class RegisterView(APIView):
     """

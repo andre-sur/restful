@@ -1,0 +1,79 @@
+{
+  "info": {
+    "_postman_id": "12345678-issue-creation-collection",
+    "name": "Issue Creation Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Issue 1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_elise_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Bug critique dans le module auth\",\n  \"description\": \"L’authentification échoue si le token a expiré.\",\n  \"tag\": \"BUG\",\n  \"priority\": \"HIGH\",\n  \"status\": \"TO_DO\",\n  \"project\": 1,\n  \"author\": 6,\n  \"assignee\": 7\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/issues/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "issues",
+            ""
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Issue 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Ajouter une fonctionnalité de notifications\",\n  \"description\": \"Envoyer un mail quand un issue est assigné.\",\n  \"tag\": \"FEATURE\",\n  \"priority\": \"MEDIUM\",\n  \"status\": \"TO_DO\",\n  \"project\": 1,\n  \"author\": 1,\n  \"assignee\": 1\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8000/api/issues/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "issues",
+            ""
+          ]
+        }
+      }
+    }
+  ]
+}
