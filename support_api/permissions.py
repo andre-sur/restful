@@ -12,13 +12,6 @@ class IsContributorOrAuthor(permissions.BasePermission):
         # Modification / suppression : seulement l'auteur
         return obj.author == request.user
     
-    def has_object_permission(self, request, view, obj):
-        # Lecture : visible à tous les contributeurs
-        if request.method in permissions.SAFE_METHODS:
-            return obj.project.contributors.filter(user=request.user).exists()
-
-        # Modification / suppression : seulement l'auteur
-        return obj.author == request.user
 
 class IsCommentAuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -33,7 +26,7 @@ class IsProjectAuthorOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return obj.contributors.filter(user=request.user).exists()
 
-        
+    
         return obj.author == request.user
     
 class IsIssueAuthorOrReadOnly(permissions.BasePermission):

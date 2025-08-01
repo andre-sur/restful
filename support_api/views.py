@@ -30,14 +30,19 @@ class IssueViewSet(viewsets.ModelViewSet):
         return Issue.objects.filter(project__contributors__user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        user = self.request.user
+        assignee = serializer.validated_data.get('assignee', None)
+        if not assignee:
+            serializer.save(author=user, assignee=user)
+        else:
+            serializer.save(author=user)
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [IsContributor,permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]  
   
     def get_queryset(self):
-        return Comment.objects.all()#temporaire test
+        #return Comment.objects.all()#temporaire test
         user = self.request.user
         #print("DEBUG: get_queryset for user =", user)
 

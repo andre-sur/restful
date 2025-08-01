@@ -68,16 +68,14 @@ class IssueSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_time']
 
-    def validate_age(self, value):
-        if value is not None and value <= 15:
-            raise serializers.ValidationError("L'utilisateur doit avoir plus de 15 ans.")
-        return value
     
     def validate(self, data):
         project = data.get('project')
         assignee = data.get('assignee')
         if assignee and not Contributor.objects.filter(project=project, user=assignee).exists():
-            raise serializers.ValidationError("L'utilisateur assigné doit être un contributeur du projet.")
+            raise serializers.ValidationError({
+    'assignee': "L'utilisateur assigné doit être un contributeur du projet."
+})
         return data
 
 
