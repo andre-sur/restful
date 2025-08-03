@@ -9,12 +9,14 @@ from .permissions import *
 from django.db.models import Q
 
 class ProjectViewSet(viewsets.ModelViewSet):
-    #queryset = Project.objects.all()
+    
     serializer_class = ProjectSerializer
     permission_classes = [permissions.IsAuthenticated, IsProjectAuthorOrReadOnly, IsAgeCompliant]
 
     def get_queryset(self):
-        return Project.objects.filter(contributors__user=self.request.user)
+        return Project.objects.select_related('author') \
+        .filter(contributors__user=self.request.user) \
+        .order_by('-created_time')
 
     def perform_create(self, serializer):
         project = serializer.save(author=self.request.user)
