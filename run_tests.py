@@ -42,3 +42,4 @@ with open(filename, 'w', encoding='utf-8') as f:
 # 7. Afficher résumé des tests et couverture dans la console
 print(f"Tests exécutés: {result.testsRun}, Erreurs: {len(result.errors)}, Échecs: {len(result.failures)}")
 cov.report()
+

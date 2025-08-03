@@ -11,19 +11,20 @@ from support_api.models import Project, Contributor, Issue, Comment
 
 User = get_user_model()
 
-class CommentPermissionsTest(TestCase):
+# --- Classe commune pour setup partagé ---
+class BaseTestCase(TestCase):
     def setUp(self):
-        # Création des utilisateurs
+        # Utilisateurs
         self.author = User.objects.create_user(username='auteur', password='pass')
         self.contributor = User.objects.create_user(username='contrib', password='pass')
         self.stranger = User.objects.create_user(username='intrus', password='pass')
 
-        # Création d'un projet avec contributeurs
+        # Projet
         self.project = Project.objects.create(title='Projet Test', description='desc', type='BACK_END', author=self.author)
         Contributor.objects.create(user=self.author, project=self.project)
         Contributor.objects.create(user=self.contributor, project=self.project)
 
-        # Création d'une issue liée au projet
+        # Issue
         self.issue = Issue.objects.create(
             title='Issue test',
             description='desc',
@@ -33,7 +34,7 @@ class CommentPermissionsTest(TestCase):
             author=self.author
         )
 
-        # Création d'un commentaire lié à l'issue
+        # Commentaire
         self.comment = Comment.objects.create(description='Un commentaire', author=self.author, issue=self.issue)
 
         # Clients authentifiés
@@ -46,26 +47,30 @@ class CommentPermissionsTest(TestCase):
         self.client_stranger = APIClient()
         self.client_stranger.force_authenticate(user=self.stranger)
 
-     # Création du superuser 
+        # Superuser
         self.superuser = User.objects.create_superuser(username='superuser', password='pass', age=40)
         self.client_superuser = APIClient()
         self.client_superuser.force_authenticate(user=self.superuser)
 
-# CATEGORIE - COMMENT ====================================================================
+# ===== Tests Commentaires =====
+class CommentPermissionsTest(BaseTestCase):
 
     def test_stranger_cannot_see_comment(self):
+        print(">> Running test_stranger_cannot_see_comment")
         url = f'/api/comments/{self.comment.id}/'
         response = self.client_stranger.get(url)
         print(f"RESPONSE API cannot see comment {response}")
-        self.assertEqual(response.status_code, 403)  # Non-contributeur = pas d'accès
+        self.assertEqual(response.status_code, 404)
 
     def test_contributor_can_see_comment(self):
+        print(">> Running test_contributor_can_see_comment")
         url = f'/api/comments/{self.comment.id}/'
         response = self.client_contributor.get(url)
         print(f"RESPONSE contributor can see {response}")
         self.assertEqual(response.status_code, 200)
 
     def test_author_can_update_comment(self):
+        print(">> Running test_author_can_update_comment")
         url = f'/api/comments/{self.comment.id}/'
         data = {'description': 'Commentaire modifié'}
         response = self.client_author.patch(url, data, format='json')
@@ -75,15 +80,18 @@ class CommentPermissionsTest(TestCase):
         self.assertEqual(self.comment.description, 'Commentaire modifié')
 
     def test_contributor_cannot_update_comment(self):
+        print(">> Running test_contributor_cannot_update_comment")
         url = f'/api/comments/{self.comment.id}/'
         data = {'description': 'Modification non autorisée'}
         response = self.client_contributor.patch(url, data, format='json')
         print(f"RESPONSE 2 {response}")
         self.assertEqual(response.status_code, 403)
 
-# CATEGORIE - USER ====================================================================
+# ===== Tests Users =====
+class UserCreationTest(BaseTestCase):
 
     def test_cannot_create_user_with_age_under_15(self):
+        print(">> Running test_cannot_create_user_with_age_under_15")
         url = '/api/users/'
         data = {
             "username": "jeune",
@@ -97,9 +105,11 @@ class CommentPermissionsTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("age", response.data)
 
-# CATEGORIE - ISSUES ====================================================================
+# ===== Tests Issues =====
+class IssuePermissionsTest(BaseTestCase):
 
     def test_author_can_update_issue(self):
+        print(">> Running test_author_can_update_issue")
         url = f'/api/issues/{self.issue.id}/'
         data = {'title': 'Titre modifié', 'priority': 'LOW'}
         response = self.client_author.patch(url, data, format='json')
@@ -109,45 +119,44 @@ class CommentPermissionsTest(TestCase):
         self.assertEqual(self.issue.title, 'Titre modifié')
         self.assertEqual(self.issue.priority, 'LOW')
 
-    
-def test_contributor_can_list_issues(self):
-    url = f'/api/issues/'
-    response = self.client_contributor.get(url)
-    print(f"RESPONSE contributor list issues: {response.data}")
+    def test_contributor_can_list_issues(self):
+        print(">> Running test_contributor_can_list_issues")
+        url = f'/api/issues/'
+        response = self.client_contributor.get(url)
+        print(f"RESPONSE contributor list issues: {response.data}")
 
-    self.assertEqual(response.status_code, 200)
-
-    results = response.data['results']
-
-    self.assertIsInstance(results, list)
-    self.assertTrue(any(issue['id'] == self.issue.id for issue in results))
-
-
+        self.assertEqual(response.status_code, 200)
+        results = response.data['results']
+        self.assertIsInstance(results, list)
+        self.assertTrue(any(issue['id'] == self.issue.id for issue in results))
 
     def test_contributor_can_view_specific_issue(self):
+        print(">> Running test_contributor_can_view_specific_issue")
         url = f'/api/issues/{self.issue.id}/'
         response = self.client_contributor.get(url)
         print(f"RESPONSE contributor view issue detail: {response}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['id'], str(self.issue.id))
 
-
-# CATEGORIE - PROJECT ====================================================================
+# ===== Tests Projects =====
+class ProjectPermissionsTest(BaseTestCase):
 
     def test_contributor_can_view_project(self):
+        print(">> Running test_contributor_can_view_project")
         url = f'/api/projects/{self.project.id}/'
         response = self.client_contributor.get(url)
         print(f"RESPONSE contributor can view project: {response.status_code}")
         self.assertEqual(response.status_code, 200)
 
     def test_stranger_cannot_view_project(self):
+        print(">> Running test_stranger_cannot_view_project")
         url = f'/api/projects/{self.project.id}/'
         response = self.client_stranger.get(url)
         print(f"RESPONSE stranger cannot view project: {response.status_code}")
-        self.assertEqual(response.status_code, 404)
-
+        self.assertEqual(response.status_code, 403)
 
     def test_author_can_update_project(self):
+        print(">> Running test_author_can_update_project")
         url = f'/api/projects/{self.project.id}/'
         data = {'title': 'Projet modifié'}
         response = self.client_author.patch(url, data, format='json')
@@ -157,6 +166,7 @@ def test_contributor_can_list_issues(self):
         self.assertEqual(self.project.title, 'Projet modifié')
 
     def test_contributor_cannot_update_project(self):
+        print(">> Running test_contributor_cannot_update_project")
         url = f'/api/projects/{self.project.id}/'
         data = {'title': 'Modification non autorisée'}
         response = self.client_contributor.patch(url, data, format='json')

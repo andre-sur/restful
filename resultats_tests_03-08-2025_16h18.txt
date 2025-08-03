@@ -3,21 +3,12 @@ test_author_can_update_issue (tests.CommentPermissionsTest.test_author_can_updat
 test_cannot_create_user_with_age_under_15 (tests.CommentPermissionsTest.test_cannot_create_user_with_age_under_15) ... ok
 test_contributor_can_see_comment (tests.CommentPermissionsTest.test_contributor_can_see_comment) ... ok
 test_contributor_cannot_update_comment (tests.CommentPermissionsTest.test_contributor_cannot_update_comment) ... ok
-test_stranger_cannot_see_comment (tests.CommentPermissionsTest.test_stranger_cannot_see_comment) ... FAIL
-
-======================================================================
-FAIL: test_stranger_cannot_see_comment (tests.CommentPermissionsTest.test_stranger_cannot_see_comment)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "C:\Users\andre\Desktop\RESTFUL\support_api\tests.py", line 60, in test_stranger_cannot_see_comment
-    self.assertEqual(response.status_code, 403)  # Non-contributeur = pas d'accès
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: 404 != 403
+test_stranger_cannot_see_comment (tests.CommentPermissionsTest.test_stranger_cannot_see_comment) ... ok
 
 ----------------------------------------------------------------------
-Ran 6 tests in 8.371s
+Ran 6 tests in 8.258s
 
-FAILED (failures=1)
+OK
 
 
 Rapport de couverture:
