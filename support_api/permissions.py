@@ -22,15 +22,15 @@ class IsCommentAuthorOrReadOnly(permissions.BasePermission):
 
 class IsProjectAuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
+        print(f"Request user: {request.user}, Project author: {obj.author}, Method: {request.method}")
         if request.method in permissions.SAFE_METHODS:
-            return obj.contributors.filter(user=request.user).exists() or obj.author == request.user
-        return obj.author == request.user
+            allowed = obj.contributors.filter(user=request.user).exists() or obj.author == request.user
+            print(f"Safe method, allowed? {allowed}")
+            return allowed
+        allowed = obj.author == request.user
+        print(f"Not safe method, allowed? {allowed}")
+        return allowed
    
-class IsIssueAuthorOrReadOnly(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return obj.project.contributors.filter(user=request.user).exists()
-        return obj.author == request.user
 
 class IsContributor(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):

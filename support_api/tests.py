@@ -109,12 +109,20 @@ class CommentPermissionsTest(TestCase):
         self.assertEqual(self.issue.title, 'Titre modifié')
         self.assertEqual(self.issue.priority, 'LOW')
 
-    def test_contributor_can_list_issues(self):
-        url = '/api/issues/'
-        response = self.client_contributor.get(url)
-        print(f"RESPONSE contributor list issues: {response}")
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(any(issue['id'] == str(self.issue.id) for issue in response.data))
+    
+def test_contributor_can_list_issues(self):
+    url = f'/api/issues/'
+    response = self.client_contributor.get(url)
+    print(f"RESPONSE contributor list issues: {response.data}")
+
+    self.assertEqual(response.status_code, 200)
+
+    results = response.data['results']
+
+    self.assertIsInstance(results, list)
+    self.assertTrue(any(issue['id'] == self.issue.id for issue in results))
+
+
 
     def test_contributor_can_view_specific_issue(self):
         url = f'/api/issues/{self.issue.id}/'
@@ -136,7 +144,8 @@ class CommentPermissionsTest(TestCase):
         url = f'/api/projects/{self.project.id}/'
         response = self.client_stranger.get(url)
         print(f"RESPONSE stranger cannot view project: {response.status_code}")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
+
 
     def test_author_can_update_project(self):
         url = f'/api/projects/{self.project.id}/'

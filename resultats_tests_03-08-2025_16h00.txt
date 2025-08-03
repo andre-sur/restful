@@ -1,4 +1,5 @@
 test_author_can_update_comment (tests.CommentPermissionsTest.test_author_can_update_comment) ... ok
+test_author_can_update_issue (tests.CommentPermissionsTest.test_author_can_update_issue) ... ok
 test_cannot_create_user_with_age_under_15 (tests.CommentPermissionsTest.test_cannot_create_user_with_age_under_15) ... ok
 test_contributor_can_see_comment (tests.CommentPermissionsTest.test_contributor_can_see_comment) ... ok
 test_contributor_cannot_update_comment (tests.CommentPermissionsTest.test_contributor_cannot_update_comment) ... ok
@@ -8,13 +9,13 @@ test_stranger_cannot_see_comment (tests.CommentPermissionsTest.test_stranger_can
 FAIL: test_stranger_cannot_see_comment (tests.CommentPermissionsTest.test_stranger_cannot_see_comment)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "C:\Users\andre\Desktop\RESTFUL\support_api\tests.py", line 58, in test_stranger_cannot_see_comment
+  File "C:\Users\andre\Desktop\RESTFUL\support_api\tests.py", line 60, in test_stranger_cannot_see_comment
     self.assertEqual(response.status_code, 403)  # Non-contributeur = pas d'accès
     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: 404 != 403
 
 ----------------------------------------------------------------------
-Ran 5 tests in 10.850s
+Ran 6 tests in 8.371s
 
 FAILED (failures=1)
 
@@ -24,10 +25,10 @@ Name                                 Stmts   Miss  Cover
 --------------------------------------------------------
 rest\urls.py                             6      0   100%
 support_api\migrations\__init__.py       0      0   100%
-support_api\permissions.py              49     20    59%
-support_api\serializers.py              51     14    73%
-support_api\tests.py                    58      0   100%
+support_api\permissions.py              45     17    62%
+support_api\serializers.py              60     10    83%
+support_api\tests.py                   105     37    65%
 support_api\urls.py                     10      0   100%
-support_api\views.py                    63     22    65%
+support_api\views.py                    75     27    64%
 --------------------------------------------------------
-TOTAL                                  237     56    76%
+TOTAL                                  301     91    70%

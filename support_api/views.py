@@ -10,18 +10,23 @@ from django.db.models import Q
 from django.db import models
 
 
-
-
 class ProjectViewSet(viewsets.ModelViewSet):
     
     serializer_class = ProjectSerializer
     permission_classes = [permissions.IsAuthenticated, IsProjectAuthorOrReadOnly, IsAgeCompliant]
 
-   
+    """
     def get_queryset(self):
         return Project.objects.filter(
         models.Q(contributors__user=self.request.user) | models.Q(author=self.request.user)
         ).distinct()
+    """
+    def get_queryset(self):
+        qs = Project.objects.filter(
+            Q(contributors__user=self.request.user) | Q(author=self.request.user)
+        ).distinct()
+        print(f"get_queryset expanded: {qs.query}")  
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'list':
