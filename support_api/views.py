@@ -7,14 +7,21 @@ from .models import Project, Contributor, Issue, Comment, CustomUser
 from .serializers import *
 from .permissions import *
 from django.db.models import Q
+from django.db import models
+
+
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     
     serializer_class = ProjectSerializer
     permission_classes = [permissions.IsAuthenticated, IsProjectAuthorOrReadOnly, IsAgeCompliant]
 
+   
     def get_queryset(self):
-        return Project.objects.filter(contributors__user=self.request.user)
+        return Project.objects.filter(
+        models.Q(contributors__user=self.request.user) | models.Q(author=self.request.user)
+        ).distinct()
 
     def get_serializer_class(self):
         if self.action == 'list':

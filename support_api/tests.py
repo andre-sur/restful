@@ -51,6 +51,8 @@ class CommentPermissionsTest(TestCase):
         self.client_superuser = APIClient()
         self.client_superuser.force_authenticate(user=self.superuser)
 
+# CATEGORIE - COMMENT ====================================================================
+
     def test_stranger_cannot_see_comment(self):
         url = f'/api/comments/{self.comment.id}/'
         response = self.client_stranger.get(url)
@@ -79,6 +81,8 @@ class CommentPermissionsTest(TestCase):
         print(f"RESPONSE 2 {response}")
         self.assertEqual(response.status_code, 403)
 
+# CATEGORIE - USER ====================================================================
+
     def test_cannot_create_user_with_age_under_15(self):
         url = '/api/users/'
         data = {
@@ -92,6 +96,8 @@ class CommentPermissionsTest(TestCase):
         response = self.client_superuser.post(url, data, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertIn("age", response.data)
+
+# CATEGORIE - ISSUES ====================================================================
 
     def test_author_can_update_issue(self):
         url = f'/api/issues/{self.issue.id}/'
@@ -116,6 +122,9 @@ class CommentPermissionsTest(TestCase):
         print(f"RESPONSE contributor view issue detail: {response}")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['id'], str(self.issue.id))
+
+
+# CATEGORIE - PROJECT ====================================================================
 
     def test_contributor_can_view_project(self):
         url = f'/api/projects/{self.project.id}/'
