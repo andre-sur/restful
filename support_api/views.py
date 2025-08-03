@@ -26,8 +26,9 @@ class IssueViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsContributorOrAuthor]
 
     def get_queryset(self):
-        #return Issue.objects.all()#temporaire
-        return Issue.objects.filter(project__contributors__user=self.request.user)
+        return Issue.objects.select_related('project', 'author', 'assignee') \
+        .filter(project__contributors__user=self.request.user) \
+        .order_by('-created_time')
 
     def perform_create(self, serializer):
         user = self.request.user
