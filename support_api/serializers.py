@@ -91,3 +91,11 @@ class CommentSerializer(serializers.ModelSerializer):
         if not CustomUser.objects.filter(id=author.id).exists():
             raise serializers.ValidationError({'author': "L'auteur spécifié n'existe pas."})
         return Comment.objects.create(**validated_data)
+    
+class ProjectListSerializer(serializers.ModelSerializer):
+    author = serializers.ReadOnlyField(source='author.username')
+
+    class Meta:
+        model = Project
+        fields = ['id', 'title', 'type', 'author']
+

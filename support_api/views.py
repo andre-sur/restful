@@ -14,9 +14,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsProjectAuthorOrReadOnly, IsAgeCompliant]
 
     def get_queryset(self):
-        return Project.objects.select_related('author') \
-        .filter(contributors__user=self.request.user) \
-        .order_by('-created_time')
+        return Project.objects.filter(contributors__user=self.request.user)
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ProjectListSerializer  # Vue allégée pour GET /projects/
+        return ProjectSerializer # vue complète si demande numéro spécifique
 
     def perform_create(self, serializer):
         project = serializer.save(author=self.request.user)
@@ -45,15 +48,12 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [IsContributor,permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]  
   
     def get_queryset(self):
-        #return Comment.objects.all()#temporaire test
+     
         user = self.request.user
-        #print("DEBUG: get_queryset for user =", user)
-
         comments = Comment.objects.filter(
            Q(issue__project__contributors__user=user) |
            Q(issue__project__author=user)
         ).distinct()
-#        print("DEBUG: Comments queryset IDs =", list(comments.values_list('id', flat=True)))
         return comments
 
     def perform_create(self, serializer):
@@ -71,7 +71,6 @@ class ContributorViewSet(viewsets.ModelViewSet):
     permission_classes = [IsContributor,permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Retournons les contributeurs des projets auxquels l'utilisateur est contributeur
         return Contributor.objects.filter(project__contributors__user=self.request.user)
 
 class UserViewSet(viewsets.ModelViewSet):
