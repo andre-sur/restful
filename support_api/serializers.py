@@ -99,3 +99,9 @@ class ProjectListSerializer(serializers.ModelSerializer):
         model = Project
         fields = ['id', 'title']
 
+class IssueListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Issue
+        fields = ['id', 'title', 'priority', 'status']
+
+

@@ -34,6 +34,11 @@ class IssueViewSet(viewsets.ModelViewSet):
         return Issue.objects.select_related('project', 'author', 'assignee') \
         .filter(project__contributors__user=self.request.user) \
         .order_by('-created_time')
+    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return IssueListSerializer
+        return IssueSerializer
 
     def perform_create(self, serializer):
         user = self.request.user
