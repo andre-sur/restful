@@ -92,3 +92,55 @@ class CommentPermissionsTest(TestCase):
         response = self.client_superuser.post(url, data, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertIn("age", response.data)
+
+    def test_author_can_update_issue(self):
+        url = f'/api/issues/{self.issue.id}/'
+        data = {'title': 'Titre modifié', 'priority': 'LOW'}
+        response = self.client_author.patch(url, data, format='json')
+        print(f"RESPONSE author update issue: {response}")
+        self.assertEqual(response.status_code, 200)
+        self.issue.refresh_from_db()
+        self.assertEqual(self.issue.title, 'Titre modifié')
+        self.assertEqual(self.issue.priority, 'LOW')
+
+    def test_contributor_can_list_issues(self):
+        url = '/api/issues/'
+        response = self.client_contributor.get(url)
+        print(f"RESPONSE contributor list issues: {response}")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(any(issue['id'] == str(self.issue.id) for issue in response.data))
+
+    def test_contributor_can_view_specific_issue(self):
+        url = f'/api/issues/{self.issue.id}/'
+        response = self.client_contributor.get(url)
+        print(f"RESPONSE contributor view issue detail: {response}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['id'], str(self.issue.id))
+
+    def test_contributor_can_view_project(self):
+        url = f'/api/projects/{self.project.id}/'
+        response = self.client_contributor.get(url)
+        print(f"RESPONSE contributor can view project: {response.status_code}")
+        self.assertEqual(response.status_code, 200)
+
+    def test_stranger_cannot_view_project(self):
+        url = f'/api/projects/{self.project.id}/'
+        response = self.client_stranger.get(url)
+        print(f"RESPONSE stranger cannot view project: {response.status_code}")
+        self.assertEqual(response.status_code, 403)
+
+    def test_author_can_update_project(self):
+        url = f'/api/projects/{self.project.id}/'
+        data = {'title': 'Projet modifié'}
+        response = self.client_author.patch(url, data, format='json')
+        print(f"RESPONSE author update project: {response.status_code}")
+        self.assertEqual(response.status_code, 200)
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.title, 'Projet modifié')
+
+    def test_contributor_cannot_update_project(self):
+        url = f'/api/projects/{self.project.id}/'
+        data = {'title': 'Modification non autorisée'}
+        response = self.client_contributor.patch(url, data, format='json')
+        print(f"RESPONSE contributor update project forbidden: {response.status_code}")
+        self.assertEqual(response.status_code, 403)
