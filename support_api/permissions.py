@@ -7,10 +7,10 @@ class IsContributorOrAuthor(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         # Lecture : visible à tous les contributeurs
         if request.method in permissions.SAFE_METHODS:
-            return obj.project.contributors.filter(user=request.user).exists()
-
+            return obj.project.contributors.filter(user=request.user).exists()  or obj.author == request.user
+        else :
         # Modification / suppression : seulement l'auteur
-        return obj.author == request.user
+            return obj.author == request.user
     
 
 class IsCommentAuthorOrReadOnly(permissions.BasePermission):
@@ -22,15 +22,29 @@ class IsCommentAuthorOrReadOnly(permissions.BasePermission):
 
 class IsProjectAuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        print(f"Request user: {request.user}, Project author: {obj.author}, Method: {request.method}")
+        print(f"[PERMISSION] request.user.id = {request.user.id} vs obj.author.id = {obj.author.id}")
+        print(f"[Permission] has_object_permission called")
+        print(f"  → Request user: {request.user} (id={request.user.id})")
+        print(f"  → Project author: {obj.author} (id={obj.author.id})")
+        print(f"  → HTTP method: {request.method}")
+        print(f"[PERM DEBUG] has_object_permission called:")
+        print(f"- Method: {request.method}")
+        print(f"- Request user ID: {request.user.id}")
+        print(f"- Project author ID: {obj.author.id}")
+        print(f"- Contributor IDs: {[c.user_id for c in obj.contributors.all()]}")
+
         if request.method in permissions.SAFE_METHODS:
-            allowed = obj.contributors.filter(user=request.user).exists() or obj.author == request.user
-            print(f"Safe method, allowed? {allowed}")
+          
+            allowed = obj.contributors.filter(user=request.user).exists() or obj.author_id == request.user.id
+
+            print(f"  → Safe method → Allowed? {allowed}")
             return allowed
-        allowed = obj.author == request.user
-        print(f"Not safe method, allowed? {allowed}")
+
+        allowed = obj.author.id == request.user.id
+
+        print(f"  → Not safe method → Allowed? {allowed}")
         return allowed
-   
+
 
 class IsContributor(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):

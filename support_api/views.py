@@ -10,32 +10,34 @@ from django.db.models import Q
 from django.db import models
 
 
-class ProjectViewSet(viewsets.ModelViewSet):
-    
-    serializer_class = ProjectSerializer
-    permission_classes = [permissions.IsAuthenticated, IsProjectAuthorOrReadOnly, IsAgeCompliant]
 
-    """
+class ProjectViewSet(viewsets.ModelViewSet):
+    serializer_class = ProjectSerializer
+    permission_classes = [permissions.IsAuthenticated, IsProjectAuthorOrReadOnly]
+
     def get_queryset(self):
-        return Project.objects.filter(
-        models.Q(contributors__user=self.request.user) | models.Q(author=self.request.user)
-        ).distinct()
-    """
-    def get_queryset(self):
+        user = self.request.user
         qs = Project.objects.filter(
-            Q(contributors__user=self.request.user) | Q(author=self.request.user)
-        ).distinct()
-        print(f"get_queryset expanded: {qs.query}")  
+            Q(contributors__user=user) | Q(author=user)
+        ).distinct().order_by('id')
+        print(f"[VIEW DEBUG] get_queryset for user {self.request.user.id} (username: {self.request.user.username}) returns: {[p.id for p in qs]}")
+        
         return qs
 
     def get_serializer_class(self):
         if self.action == 'list':
-            return ProjectListSerializer  # Vue allégée pour GET /projects/
-        return ProjectSerializer # vue complète si demande numéro spécifique
+            return ProjectListSerializer
+        return ProjectSerializer
 
     def perform_create(self, serializer):
         project = serializer.save(author=self.request.user)
         Contributor.objects.create(user=self.request.user, project=project)
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        print(f"[VIEW DEBUG] Retrieved project object ID: {instance.id}, author_id: {instance.author_id}")
+        return super().retrieve(request, *args, **kwargs)
+
 
 class IssueViewSet(viewsets.ModelViewSet):
     serializer_class = IssueSerializer

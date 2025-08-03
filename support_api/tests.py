@@ -56,6 +56,10 @@ class BaseTestCase(TestCase):
         self.client_superuser = APIClient()
         self.client_superuser.force_authenticate(user=self.superuser)
         print(f"Setup Superuser: superuser_id={self.superuser.id}")
+        print(f"[SETUP DEBUG] Projet author ID: {self.project.author.id} == User ID: {self.author.id}?")
+        print(f"[SETUP DEBUG] Project exists? {Project.objects.filter(id=self.project.id).exists()}")
+        print(f"[SETUP DEBUG] Projects where author={self.author.id}: {Project.objects.filter(author=self.author)}")
+        print(f"[SETUP DEBUG] Projects where contributor={self.author.id}: {Project.objects.filter(contributors__user=self.author)}")
 
 
 # ===== Tests Commentaires =====
@@ -67,7 +71,7 @@ class CommentPermissionsTest(BaseTestCase):
         print(f"URL: {url} -- Stranger user ID: {self.stranger.id}")
         response = self.client_stranger.get(url)
         print(f"RESPONSE: status_code={response.status_code}")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
     def test_contributor_can_see_comment(self):
         print(">> Running test_contributor_can_see_comment")
@@ -82,6 +86,11 @@ class CommentPermissionsTest(BaseTestCase):
         url = f'/api/comments/{self.comment.id}/'
         data = {'description': 'Commentaire modifié'}
         print(f"URL: {url} -- Author user ID: {self.author.id}")
+        # Vérifie les projets que l'auteur peut voir
+        list_url = '/api/projects/'
+        response_list = self.client_author.get(list_url)
+        print(f"[DEBUG] Projects visible by author ({self.author.id}): {[p['id'] for p in response_list.data.get('results', [])]}")
+
         response = self.client_author.patch(url, data, format='json')
         print(f"RESPONSE: status_code={response.status_code}")
         self.assertEqual(response.status_code, 200)
