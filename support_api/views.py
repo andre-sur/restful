@@ -64,7 +64,7 @@ class IssueViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsContributor,permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]  
+    permission_classes = [IsContributorOrAuthor,permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]  
   
     def get_queryset(self):
      
@@ -72,7 +72,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         comments = Comment.objects.filter(
            Q(issue__project__contributors__user=user) |
            Q(issue__project__author=user)
-        ).distinct()
+        ).distinct().order_by('id')
         return comments
 
     def perform_create(self, serializer):
@@ -100,6 +100,13 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == 'create':
             return [IsSuperUser()]  # seuls les superusers peuvent créer
+        elif self.action in ['update', 'partial_update', 'destroy']:
+            return [IsSelfOrSuperUser()]
+        return [permissions.IsAuthenticated()]
+    
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsSuperUser()]
         elif self.action in ['update', 'partial_update', 'destroy']:
             return [IsSelfOrSuperUser()]
         return [permissions.IsAuthenticated()]

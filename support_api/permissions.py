@@ -48,13 +48,13 @@ class IsProjectAuthorOrReadOnly(permissions.BasePermission):
 
 class IsContributor(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        
+        user = request.user
         if isinstance(obj, Project):
-            return obj.contributors.filter(user=request.user).exists()
+            return (obj.contributors.filter(user=user).exists() or obj.author == user)
         elif isinstance(obj, Issue):
-            return obj.project.contributors.filter(user=request.user).exists()
+            return (obj.project.contributors.filter(user=user).exists() or obj.project.author == user)
         elif isinstance(obj, Comment):
-            return obj.issue.project.contributors.filter(user=request.user).exists()
+            return (obj.issue.project.contributors.filter(user=user).exists() or obj.issue.project.author == user)
         return False
 
 class IsAgeCompliant(permissions.BasePermission):

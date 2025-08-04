@@ -62,16 +62,16 @@ class BaseTestCase(TestCase):
         print(f"[SETUP DEBUG] Projects where contributor={self.author.id}: {Project.objects.filter(contributors__user=self.author)}")
 
 
-# ===== Tests Commentaires =====
+# ===== COMMENTS====================================
 class CommentPermissionsTest(BaseTestCase):
 
     def test_stranger_cannot_see_comment(self):
         print(">> Running test_stranger_cannot_see_comment")
         url = f'/api/comments/{self.comment.id}/'
         print(f"URL: {url} -- Stranger user ID: {self.stranger.id}")
-        response = self.client_stranger.get(url)
+        response = self.client.get(f'/api/comments/{self.comment.id}/', **self.stranger_auth_header)
         print(f"RESPONSE: status_code={response.status_code}")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_contributor_can_see_comment(self):
         print(">> Running test_contributor_can_see_comment")
@@ -107,7 +107,7 @@ class CommentPermissionsTest(BaseTestCase):
         self.assertEqual(response.status_code, 403)
 
 
-# ===== Tests Users =====
+# ===== USERS ===============================================
 class UserCreationTest(BaseTestCase):
 
     def test_cannot_create_user_with_age_under_15(self):
@@ -128,7 +128,7 @@ class UserCreationTest(BaseTestCase):
         self.assertIn("age", response.data)
 
 
-# ===== Tests Issues =====
+# ===== ISSUES =======================================================
 class IssuePermissionsTest(BaseTestCase):
 
     def test_author_can_update_issue(self):
@@ -164,7 +164,7 @@ class IssuePermissionsTest(BaseTestCase):
         self.assertEqual(response.data['id'], self.issue.id)
 
 
-# ===== Tests Projects =====
+# ===== PROJECTS ========================================================
 class ProjectPermissionsTest(BaseTestCase):
 
     def test_contributor_can_view_project(self):
@@ -201,4 +201,15 @@ class ProjectPermissionsTest(BaseTestCase):
         print(f"URL: {url} -- Contributor user ID: {self.contributor.id}")
         response = self.client_contributor.patch(url, data, format='json')
         print(f"RESPONSE: status_code={response.status_code}")
+        self.assertEqual(response.status_code, 403)
+
+    def test_user_can_delete_own_account(self):
+        url = f'/api/users/{self.author.id}/'
+        response = self.client_author.delete(url)
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(User.objects.filter(id=self.author.id).exists())
+
+    def test_user_cannot_delete_other_account(self):
+        url = f'/api/users/{self.contributor.id}/'
+        response = self.client_author.delete(url)
         self.assertEqual(response.status_code, 403)
