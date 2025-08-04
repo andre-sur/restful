@@ -95,21 +95,22 @@ class ContributorViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]  # Assurez-vous que l'utilisateur soit authentifié
+    permission_classes = [permissions.IsAuthenticated]
 
-    def get_permissions(self):
-        if self.action == 'create':
-            return [IsSuperUser()]  # seuls les superusers peuvent créer
-        elif self.action in ['update', 'partial_update', 'destroy']:
-            return [IsSelfOrSuperUser()]
-        return [permissions.IsAuthenticated()]
-    
     def get_permissions(self):
         if self.action == 'create':
             return [IsSuperUser()]
         elif self.action in ['update', 'partial_update', 'destroy']:
             return [IsSelfOrSuperUser()]
         return [permissions.IsAuthenticated()]
+
+    def perform_create(self, serializer):
+        # Ici on crée l'utilisateur avec create_user() pour le password hashé
+        password = serializer.validated_data.pop('password', None)
+        user = serializer.save()
+        if password:
+            user.set_password(password)
+            user.save()
 
 class RegisterView(APIView):
     """
