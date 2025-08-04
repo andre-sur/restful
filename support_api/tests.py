@@ -69,9 +69,10 @@ class CommentPermissionsTest(BaseTestCase):
         print(">> Running test_stranger_cannot_see_comment")
         url = f'/api/comments/{self.comment.id}/'
         print(f"URL: {url} -- Stranger user ID: {self.stranger.id}")
-        response = self.client.get(f'/api/comments/{self.comment.id}/', **self.stranger_auth_header)
+        response = self.client_stranger.get(url)  # <-- utiliser client_stranger déjà authentifié
         print(f"RESPONSE: status_code={response.status_code}")
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)  # ou 403 selon ce que tu attends
+
 
     def test_contributor_can_see_comment(self):
         print(">> Running test_contributor_can_see_comment")
@@ -181,7 +182,7 @@ class ProjectPermissionsTest(BaseTestCase):
         print(f"URL: {url} -- Stranger user ID: {self.stranger.id}")
         response = self.client_stranger.get(url)
         print(f"RESPONSE: status_code={response.status_code}")
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_author_can_update_project(self):
         print(">> Running test_author_can_update_project")

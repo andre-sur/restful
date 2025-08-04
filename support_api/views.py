@@ -64,7 +64,7 @@ class IssueViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsContributorOrAuthor,permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]  
+    permission_classes = [permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]  
   
     def get_queryset(self):
      
