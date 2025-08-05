@@ -42,12 +42,14 @@ class ProjectViewSet(viewsets.ModelViewSet):
 class IssueViewSet(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
  
-    permission_classes = [permissions.IsAuthenticated, IsContributorOrAuthor]
+    #permission_classes = [permissions.IsAuthenticated, IsContributorOrAuthor]
+    permission_classes = [permissions.IsAuthenticated, IsIssueAuthorOrReadOnly]
 
     def get_queryset(self):
-        return Issue.objects.select_related('project', 'author', 'assignee') \
-        .filter(project__contributors__user=self.request.user) \
-        .order_by('-created_time')
+        user = self.request.user
+        return Issue.objects.filter(
+            Q(project__contributors__user=user) | Q(project__author=user)
+        ).distinct().order_by('created_time')
     
     def get_serializer_class(self):
         if self.action == 'list':
@@ -62,26 +64,41 @@ class IssueViewSet(viewsets.ModelViewSet):
         else:
             serializer.save(author=user)
 
+from rest_framework import viewsets, permissions
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from .models import Comment
+from .serializers import CommentSerializer
+from .permissions import IsCommentAuthorOrReadOnly
+from django.db.models import Q
+
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]  
-  
+    permission_classes = [permissions.IsAuthenticated, IsCommentAuthorOrReadOnly]
+
     def get_queryset(self):
-     
         user = self.request.user
         comments = Comment.objects.filter(
-           Q(issue__project__contributors__user=user) |
-           Q(issue__project__author=user)
+            Q(issue__project__contributors__user=user) |
+            Q(issue__project__author=user)
         ).distinct().order_by('id')
         return comments
 
     def perform_create(self, serializer):
-      
-        serializer.save(author=self.request.user)
-    
+        issue = serializer.validated_data['issue']
+        project = issue.project
+        user = self.request.user
+
+        is_author = project.author == user
+        is_contributor = project.contributors.filter(user=user).exists()
+
+        if not (is_author or is_contributor):
+            raise PermissionDenied("Vous devez être contributeur ou auteur du projet pour commenter cette issue.")
+
+        serializer.save(author=user)
+
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-    
         response.data['note'] = "L'auteur a été automatiquement défini comme l'utilisateur connecté."
         return response
 
@@ -111,6 +128,13 @@ class UserViewSet(viewsets.ModelViewSet):
         if password:
             user.set_password(password)
             user.save()
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user != instance and not request.user.is_superuser:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("Vous ne pouvez accéder qu'à votre propre profil.")
+        return super().retrieve(request, *args, **kwargs)
 
 class RegisterView(APIView):
     """

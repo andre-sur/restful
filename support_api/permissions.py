@@ -1,5 +1,7 @@
 # permissions.py
 from support_api.models import Project, Issue, Comment
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 from rest_framework import permissions
 
@@ -86,3 +88,16 @@ class IsSelfOrSuperUser(permissions.BasePermission):
     """
     def has_object_permission(self, request, view, obj):
         return request.user.is_superuser or obj == request.user
+    
+class IsIssueAuthorOrReadOnly(BasePermission):
+    """
+    Autorise uniquement l'auteur de l'issue à la modifier ou la supprimer.
+    """
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        if request.user == obj.author:
+            return True
+        raise PermissionDenied("Seul l'auteur peut modifier l'issue.")
+    
