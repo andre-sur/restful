@@ -85,6 +85,10 @@ class CommentViewSet(viewsets.ModelViewSet):
         return comments
 
     def perform_create(self, serializer):
+        # Vérifie si 'author' est envoyé par l'utilisateur
+        if 'author' in serializer.initial_data:
+            raise ValidationError({"author": "Ne spécifiez pas le champ 'author'. L'auteur est défini automatiquement comme l'utilisateur connecté."})
+
         issue = serializer.validated_data['issue']
         project = issue.project
         user = self.request.user
