@@ -8,6 +8,8 @@ from .serializers import *
 from .permissions import *
 from django.db.models import Q
 from django.db import models
+from rest_framework.exceptions import ValidationError
+
 
 
 
@@ -85,9 +87,13 @@ class CommentViewSet(viewsets.ModelViewSet):
         return comments
 
     def perform_create(self, serializer):
-        # Vérifie si 'author' est envoyé par l'utilisateur
-        if 'author' in serializer.initial_data:
-            raise ValidationError({"author": "Ne spécifiez pas le champ 'author'. L'auteur est défini automatiquement comme l'utilisateur connecté."})
+        request_data = self.request.data
+
+        # Vérification explicite : l'utilisateur ne doit pas envoyer le champ 'author'
+        if 'author' in request_data:
+            raise ValidationError({
+                "author": "Ne spécifiez pas ce champ. L'auteur est automatiquement défini comme l'utilisateur connecté."
+            })
 
         issue = serializer.validated_data['issue']
         project = issue.project
@@ -101,10 +107,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
         serializer.save(author=user)
 
-    def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        response.data['note'] = "L'auteur a été automatiquement défini comme l'utilisateur connecté."
-        return response
+        def create(self, request, *args, **kwargs):
+            response = super().create(request, *args, **kwargs)
+            response.data['note'] = "L'auteur a été automatiquement défini comme l'utilisateur connecté."
+            return response
 
 class ContributorViewSet(viewsets.ModelViewSet):
     serializer_class = ContributorSerializer

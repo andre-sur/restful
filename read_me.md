@@ -51,11 +51,13 @@ Exemple http://localhost:8000/api/issues/
 
 On utilise ici Postman.
 
+Créer un utilisateur avec le Superuser admin.
+
 Pour obtenir un token, faire un POST vers http://localhost:8000/api/token/
 Avec ceci (en raw) dans le body:
 {
-  "username": "elise_dev",
-  "password": "difficile"
+  "username": "admin",
+  "password": "admin"
 }
 
 Puis récupérer le token access:
@@ -71,8 +73,9 @@ Option 1 : Copier/coller le token dans Authorization / Bearer Token
 
 Option 2 : 
 Copier le token dans le Header : 
-a) sous forme de variable (si vous êtes dans un environnement avec des variables déclarées) - Bearer {{token}} 
-b) ou bien tel quel 
+a) dans l'environnement et sous forme de variable (si vous êtes dans un environnement avec des variables déclarées) - Bearer {{token}} 
+b) ou bien tel quel dans le Header
+
 
 Attention : expiration du token 90 mn (modifiable dans le setings.py)
 
