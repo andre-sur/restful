@@ -53,6 +53,17 @@ class IssueViewSet(viewsets.ModelViewSet):
             Q(project__contributors__user=user) | Q(project__author=user)
         ).distinct().order_by('created_time')
     
+    def get_object(self):
+        try:
+            # On récupère l'issue sans filtrer par user
+            obj = Issue.objects.select_related('project', 'author', 'assignee').get(pk=self.kwargs["pk"])
+        except Issue.DoesNotExist:
+            raise NotFound("Issue non trouvée.")
+        
+        # Vérifie les permissions spécifiques à cet objet
+        self.check_object_permissions(self.request, obj)
+        return obj
+    
     def get_serializer_class(self):
         if self.action == 'list':
             return IssueListSerializer

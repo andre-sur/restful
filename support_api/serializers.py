@@ -66,16 +66,13 @@ class IssueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issue
         fields = '__all__'
-        read_only_fields = ['created_time']
-
+        read_only_fields = ['created_time','author']
     
     def validate(self, data):
-        project = data.get('project')
-        assignee = data.get('assignee')
-        if assignee and not Contributor.objects.filter(project=project, user=assignee).exists():
+        if 'author' in self.initial_data:
             raise serializers.ValidationError({
-    'assignee': "L'utilisateur assigné doit être un contributeur du projet."
-})
+                'author': "Inutile. L'auteur est défini automatiquement."
+            })
         return data
 
 
@@ -103,5 +100,6 @@ class IssueListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Issue
         fields = ['id', 'title', 'priority', 'status']
+        read_only_fields = ['author'] 
 
 
