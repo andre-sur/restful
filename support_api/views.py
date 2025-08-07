@@ -9,7 +9,13 @@ from .permissions import *
 from django.db.models import Q
 from django.db import models
 from rest_framework.exceptions import ValidationError
-
+from rest_framework import viewsets, permissions
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.response import Response
+from .models import Comment
+from .serializers import CommentSerializer
+from .permissions import IsCommentAuthorOrReadOnly
+from django.db.models import Q
 
 
 
@@ -77,13 +83,7 @@ class IssueViewSet(viewsets.ModelViewSet):
         else:
             serializer.save(author=user)
 
-from rest_framework import viewsets, permissions
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.response import Response
-from .models import Comment
-from .serializers import CommentSerializer
-from .permissions import IsCommentAuthorOrReadOnly
-from django.db.models import Q
+# ISSUE ====================================================
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -114,7 +114,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         is_contributor = project.contributors.filter(user=user).exists()
 
         if not (is_author or is_contributor):
-            raise PermissionDenied("Vous devez être contributeur ou auteur du projet pour commenter cette issue.")
+            raise PermissionDenied("Seul ontributeur ou auteur du projet peut commenter.")
 
         serializer.save(author=user)
 
