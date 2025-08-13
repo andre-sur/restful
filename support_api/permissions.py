@@ -6,14 +6,19 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework import permissions
 
 class IsContributorOrAuthor(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        # Lecture : visible à tous les contributeurs
-        if request.method in permissions.SAFE_METHODS:
-            return obj.project.contributors.filter(user=request.user).exists()  or obj.author == request.user
-        else :
-        # Modification / suppression : seulement l'auteur
-            return obj.author == request.user
     
+    def has_object_permission(self, request, view, obj):
+            print(request.user, request.method)
+            print(request.user, obj.project.contributors.all())
+
+            # Lecture : accessible à tous les contributeurs et à l'auteur
+            if request.method in permissions.SAFE_METHODS:
+                return obj.author == request.user or obj.project.contributors.filter(user=request.user).exists()
+
+            # Écriture : accessible à l'auteur et aux contributeurs
+            # NE PAS bloquer ici le contributeur (pour avoir message spécifique du serializer)
+            return obj.author == request.user or obj.project.contributors.filter(user=request.user).exists()
+        
 
 class IsCommentAuthorOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):

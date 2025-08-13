@@ -16,6 +16,7 @@ from .models import Comment
 from .serializers import CommentSerializer
 from .permissions import IsCommentAuthorOrReadOnly
 from django.db.models import Q
+from rest_framework.exceptions import NotFound
 
 
 
@@ -46,12 +47,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
         print(f"[VIEW DEBUG] Retrieved project object ID: {instance.id}, author_id: {instance.author_id}")
         return super().retrieve(request, *args, **kwargs)
 
-
+# ISSUE ====================================================
 class IssueViewSet(viewsets.ModelViewSet):
     serializer_class = IssueSerializer
  
     #permission_classes = [permissions.IsAuthenticated, IsContributorOrAuthor]
-    permission_classes = [permissions.IsAuthenticated, IsIssueAuthorOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, IsContributorOrAuthor]
 
     def get_queryset(self):
         user = self.request.user
@@ -74,16 +75,54 @@ class IssueViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return IssueListSerializer
         return IssueSerializer
+    
+class IssueViewSet(viewsets.ModelViewSet):
+    serializer_class = IssueSerializer
+    permission_classes = [permissions.IsAuthenticated, IsIssueAuthorOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Issue.objects.filter(
+            Q(project__contributors__user=user) | Q(project__author=user)
+        ).distinct().order_by('created_time')
+    
+    def get_object(self):
+        try:
+            obj = Issue.objects.select_related('project', 'author', 'assignee').get(pk=self.kwargs["pk"])
+        except Issue.DoesNotExist:
+            raise NotFound("Issue non trouvée.")
+        
+        self.check_object_permissions(self.request, obj)
+        return obj
+    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return IssueListSerializer
+        return IssueSerializer
 
     def perform_create(self, serializer):
         user = self.request.user
-        assignee = serializer.validated_data.get('assignee', None)
-        if not assignee:
-            serializer.save(author=user, assignee=user)
-        else:
-            serializer.save(author=user)
+        assignee = serializer.validated_data.get('assignee', user)  # par défaut, l'auteur
+        issue = serializer.save(author=user, assignee=assignee)
 
-# ISSUE ====================================================
+        # Vérifie ou crée le Contributor correspondant
+        contrib, created = Contributor.objects.get_or_create(
+            user=assignee,
+            project=issue.project
+        )
+        issue.project.contributors.add(contrib)
+
+    def perform_update(self, serializer):
+        issue = serializer.save()
+        assignee = serializer.validated_data.get('assignee', issue.assignee)
+        
+        # Vérifie ou crée le Contributor correspondant
+        contrib, created = Contributor.objects.get_or_create(
+            user=assignee,
+            project=issue.project
+        )
+        issue.project.contributors.add(contrib)
+# COMMENTS ====================================================
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer

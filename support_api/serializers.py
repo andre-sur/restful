@@ -73,8 +73,17 @@ class IssueSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'author': "Inutile. L'auteur est défini automatiquement."
             })
-        return data
 
+        request = self.context.get('request')
+
+        # Seul l'auteur peut modifier le contributeur
+        if self.instance and 'assignee' in data:
+            if request.user != self.instance.author:
+                raise serializers.ValidationError({
+                    'assignee': "Seul l'auteur de l'issue peut changer le contributeur."
+                })
+
+        return data
 
 # === Comment Serializer ===
 class CommentSerializer(serializers.ModelSerializer):
