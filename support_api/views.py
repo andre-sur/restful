@@ -112,16 +112,20 @@ class IssueViewSet(viewsets.ModelViewSet):
         )
         issue.project.contributors.add(contrib)
 
-    def perform_update(self, serializer):
-        issue = serializer.save()
-        assignee = serializer.validated_data.get('assignee', issue.assignee)
-        
-        # Vérifie ou crée le Contributor correspondant
-        contrib, created = Contributor.objects.get_or_create(
-            user=assignee,
-            project=issue.project
-        )
-        issue.project.contributors.add(contrib)
+def perform_update(self, serializer):
+    old_issue = self.get_object()  # On récupère l'ancienne version
+    issue = serializer.save()
+
+    # On vérifie si l'assignee a changé
+    if 'assignee' in serializer.validated_data:
+        new_assignee = serializer.validated_data['assignee']
+        if new_assignee != old_issue.assignee:
+            contrib, _ = Contributor.objects.get_or_create(
+                user=new_assignee,
+                project=issue.project
+            )
+            issue.project.contributors.add(contrib)
+
 # COMMENTS ====================================================
 
 class CommentViewSet(viewsets.ModelViewSet):

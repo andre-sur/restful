@@ -94,15 +94,16 @@ class IsSelfOrSuperUser(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return request.user.is_superuser or obj == request.user
     
-class IsIssueAuthorOrReadOnly(BasePermission):
+class IsIssueAuthorOrReadOnly(permissions.BasePermission):
     """
-    Autorise uniquement l'auteur de l'issue à la modifier ou la supprimer.
+    Permission : 
+    - Lecture pour tous les contributeurs du projet
+    - Écriture uniquement pour l'auteur de l'issue
     """
-
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
-            return True
-        if request.user == obj.author:
-            return True
-        raise PermissionDenied("Seul l'auteur peut modifier l'issue.")
-    
+        if request.method in permissions.SAFE_METHODS:
+            return (
+                obj.project.contributors.filter(user=request.user).exists() 
+                or obj.author == request.user
+            )
+        return obj.author == request.user
